@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { GoogleGenAI } from "@google/genai";
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const FULL_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const TIME_SLOTS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
+const DEFAULT_SLOTS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"];
 
 const PALETTE = [
   { bg: "#F97316", light: "rgba(249,115,22,0.14)", border: "rgba(249,115,22,0.4)", text: "#fff" },
@@ -288,6 +288,10 @@ export default function ClassNav() {
   var active = courses.filter(function (c) { return c.active; });
   var todayCls = active.filter(function (c) { return DAYS.indexOf(c.day) === todayIdx(); }).sort(function (a, b) { return toMin(a.time) - toMin(b.time); });
   var ongoingC = active.find(function (c) { return getStatus(c) === "ongoing"; }) || null;
+  // Dynamic grid slots — computed from actual course start times
+  var TIME_SLOTS = active.length > 0
+    ? Array.from(new Set(active.map(function (c) { return c.time; }))).sort(function (a, b) { return toMin(a) - toMin(b); })
+    : DEFAULT_SLOTS;
 
   function getClashes() {
     var res = [];
@@ -296,7 +300,8 @@ export default function ClassNav() {
         var a = active[i], b = active[j];
         if (a.day !== b.day) continue;
         var as = toMin(a.time), ae = as + a.duration * 60, bs = toMin(b.time), be = bs + b.duration * 60;
-        if (as < be && bs < ae) res.push([a, b]);
+        var overlapMins = Math.min(ae, be) - Math.max(as, bs);
+        if (overlapMins >= 30) res.push([a, b]);
       }
     }
     return res;
@@ -611,8 +616,7 @@ export default function ClassNav() {
                           var slotMin = toMin(slot);
                           var cells = active.filter(function (c) {
                             if (c.day !== day) return false;
-                            var cm = toMin(c.time);
-                            return cm >= slotMin && cm < slotMin + 60;
+                            return c.time === slot;
                           });
                           return (
                             <td key={day} style={{ verticalAlign: "top", padding: 4, background: di === todayIdx() ? "rgba(249,115,22,0.03)" : "transparent", minWidth: 80 }}>
