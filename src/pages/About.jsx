@@ -12,7 +12,7 @@ export default function About() {
     };
 
     return (
-        <div style={{ padding: "40px 24px", maxWidth: 800, margin: "0 auto", width: "100%" }}>
+        <div style={{ padding: "clamp(20px,4vw,40px) clamp(14px,4vw,24px)", maxWidth: 800, margin: "0 auto", width: "100%" }}>
             <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-.02em", marginBottom: 16 }}>About ClassNav</h1>
             <p style={{ color: "var(--text2)", fontSize: 16, lineHeight: 1.6, marginBottom: 48 }}>
                 ClassNav was built to solve a real problem — university students juggling multiple semesters, complex timetables, and the daily chaos of finding the right room at the right time.

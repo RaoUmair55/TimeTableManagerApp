@@ -119,6 +119,13 @@ option{background:#1e2535}
 .lbl{font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;margin-bottom:6px;display:block}
 .sh{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
 .sb{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px 16px;flex:1}
+@media(max-width:600px){
+  .stat-grid-3{grid-template-columns:repeat(2,1fr)!important}
+  .hero-sub-grid{grid-template-columns:1fr!important}
+  .nav-btn{padding:7px 10px!important;font-size:11px!important}
+  .modal{padding:18px 14px!important;border-radius:14px!important;max-height:93vh!important}
+  .overlay{padding:10px!important}
+}
 `;
 
 function OngoingHero({ c, allSems }) {
@@ -137,7 +144,7 @@ function OngoingHero({ c, allSems }) {
       <div style={{ height: 5, background: "rgba(255,255,255,0.08)", borderRadius: 10, marginBottom: 20, overflow: "hidden" }}>
         <div style={{ height: "100%", width: pct + "%", background: col.bg, borderRadius: 10 }} />
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+      <div className="hero-sub-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
         {[["Room", c.room], ["Ends In", fmtLeft(endM - nowMin())], ["Semester", c.semester]].map(function (pair) {
           return (
             <div key={pair[0]} className="sb">
@@ -466,20 +473,20 @@ export default function ClassNav() {
       <style>{CSS}</style>
 
       {/* Header */}
-      <div style={{ borderBottom: "1px solid var(--border)", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between", height: 62, position: "sticky", top: 0, background: "rgba(15,17,23,0.93)", backdropFilter: "blur(20px)", zIndex: 50, gap: 12 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 11, flexShrink: 0 }}>
-          <div style={{ width: 32, height: 32, borderRadius: 9, background: "linear-gradient(135deg,#F97316,#ef4444)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17, flexShrink: 0, boxShadow: "0 4px 12px rgba(249,115,22,0.4)" }}>◈</div>
-          <span style={{ fontWeight: 800, fontSize: 18, letterSpacing: "-.03em" }}>ClassNav</span>
-          {clashes.length > 0 && <span className="pill" onClick={function () { setClashOpen(true); }} style={{ background: "rgba(239,68,68,0.15)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.3)", fontWeight: 700, cursor: "pointer" }}>⚠ {clashes.length} clash{clashes.length > 1 ? "es" : ""}</span>}
+      <div style={{ borderBottom: "1px solid var(--border)", padding: "0 clamp(12px,3vw,24px)", display: "flex", alignItems: "center", justifyContent: "space-between", minHeight: 56, position: "sticky", top: 0, background: "rgba(15,17,23,0.93)", backdropFilter: "blur(20px)", zIndex: 50, gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <div style={{ width: 30, height: 30, borderRadius: 9, background: "linear-gradient(135deg,#F97316,#ef4444)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0, boxShadow: "0 4px 12px rgba(249,115,22,0.4)" }}>◈</div>
+          <span style={{ fontWeight: 800, fontSize: 17, letterSpacing: "-.03em" }}>ClassNav</span>
+          {clashes.length > 0 && <span className="pill" onClick={function () { setClashOpen(true); }} style={{ background: "rgba(239,68,68,0.15)", color: "#fca5a5", border: "1px solid rgba(239,68,68,0.3)", fontWeight: 700, cursor: "pointer" }}>⚠ {clashes.length}</span>}
         </div>
-        <nav style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+        <nav style={{ display: "flex", gap: 2, flexWrap: "nowrap", overflowX: "auto", WebkitOverflowScrolling: "touch", scrollbarWidth: "none" }}>
           {[["dashboard", "Now"], ["timetable", "Grid"], ["finder", "Find"], ["manage", "Manage"]].map(function (pair) {
             return <button key={pair[0]} className={"nav-btn" + (view === pair[0] ? " act" : "")} onClick={function () { setView(pair[0]); }}>{pair[1]}</button>;
           })}
         </nav>
       </div>
 
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 20px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto", padding: "clamp(16px,4vw,32px) clamp(12px,4vw,20px)" }}>
 
         {/* DASHBOARD */}
         {view === "dashboard" && (
@@ -493,7 +500,7 @@ export default function ClassNav() {
               </h1>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 24 }}>
+            <div className="stat-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 24 }}>
               {[["Today", todayCls.length + " classes", "📅"], ["Active", active.length + " total", "📚"], ["Semesters", allSems.length + " loaded", "🎓"]].map(function (t) {
                 return (
                   <div key={t[0]} style={{ background: "var(--bg2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
@@ -852,10 +859,16 @@ export default function ClassNav() {
                     {TIME_SLOTS.map(function (t) { return <option key={t}>{t}</option>; })}
                   </select>
                 </div>
-                <div><label className="lbl">DURATION</label>
-                  <select className="sel" value={newC.duration} onChange={function (e) { setNewC(function (p) { return Object.assign({}, p, { duration: parseFloat(e.target.value) }); }); }}>
-                    {[0.5, 1, 1.5, 2, 2.5, 3].map(function (d) { return <option key={d} value={d}>{d}h</option>; })}
-                  </select>
+                <div><label className="lbl">DURATION (h)</label>
+                  <input
+                    className="inp"
+                    type="number"
+                    min="0.1" max="6" step="0.01"
+                    placeholder="e.g. 0.67 for 40 min"
+                    value={newC.duration}
+                    onChange={function (e) { setNewC(function (p) { return Object.assign({}, p, { duration: parseFloat(e.target.value) || 1 }); }); }}
+                  />
+                  <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>40 min = 0.67 · 1.5h = 1.5 · Lab 2h = 2</div>
                 </div>
                 <div><label className="lbl">SEMESTER</label>
                   <select className="sel" value={newC.semester} onChange={function (e) { setNewC(function (p) { return Object.assign({}, p, { semester: e.target.value }); }); }}>

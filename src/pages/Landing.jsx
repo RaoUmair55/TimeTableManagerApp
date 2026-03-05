@@ -53,7 +53,7 @@ export default function Landing() {
                         ClassNav keeps your university schedule organized across multiple semesters — with AI timetable scanning, live class detection, and smart reminders.
                     </p>
 
-                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <div className="hero-cta" style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Link to="/app" className="btnp" style={{ textDecoration: 'none', padding: '16px 32px', fontSize: 16, display: 'inline-flex', alignItems: 'center' }}>
                             Get Started →
                         </Link>

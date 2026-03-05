@@ -101,8 +101,8 @@ export default function Settings() {
     };
 
     return (
-        <div style={{ padding: "40px 24px", maxWidth: 800, margin: "0 auto", width: "100%" }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div style={{ padding: "clamp(16px,4vw,40px) clamp(14px,4vw,24px)", maxWidth: 800, margin: "0 auto", width: "100%" }}>
+            <div className="settings-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
                 <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-.02em" }}>Settings</h1>
                 <button onClick={saveSettings} className="btnp">Save Settings</button>
             </div>
@@ -118,11 +118,11 @@ export default function Settings() {
                 <h2 style={{ fontSize: 18, fontWeight: 700, marginBottom: 16, color: 'var(--text2)' }}>Profile</h2>
                 <div className="card" style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                        <div style={{ flex: 1, minWidth: 200 }}>
+                        <div style={{ flex: 1, minWidth: '100%' }}>
                             <label className="lbl">Name</label>
                             <input className="inp" placeholder="e.g. Alex" value={settings.name} onChange={e => setSettings({ ...settings, name: e.target.value })} />
                         </div>
-                        <div style={{ flex: 1, minWidth: 200 }}>
+                        <div style={{ flex: 1, minWidth: '100%' }}>
                             <label className="lbl">University</label>
                             <input className="inp" placeholder="e.g. MIT" value={settings.uni} onChange={e => setSettings({ ...settings, uni: e.target.value })} />
                         </div>
