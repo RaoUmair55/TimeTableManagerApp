@@ -268,6 +268,8 @@ export default function ClassNav() {
   var [notifPerm, setNotifPerm] = useState("default");
   var [notifiedSet, setNotifiedSet] = useState([]);
   var [toast, setToast] = useState(null);
+  var [editOpen, setEditOpen] = useState(false);
+  var [editC, setEditC] = useState(null);
 
   useEffect(function () {
     if (typeof Notification !== "undefined") {
@@ -345,6 +347,23 @@ export default function ClassNav() {
 
   function toggleCourse(id) { setCourses(function (p) { return p.map(function (c) { return c.id === id ? Object.assign({}, c, { active: !c.active }) : c; }); }); }
   function deleteCourse(id) { setCourses(function (p) { return p.filter(function (c) { return c.id !== id; }); }); }
+
+  function openEdit(course) {
+    setEditC(Object.assign({}, course));
+    setEditOpen(true);
+  }
+
+  function saveEdit() {
+    if (!editC) return;
+    var sem = editC.semester === "__new__" ? (editC._customSem || "New Sem") : editC.semester;
+    var updated = Object.assign({}, editC, { semester: sem, time: normalizeTime(editC.time) });
+    delete updated._customSem;
+    setCourses(function (p) { return p.map(function (c) { return c.id === updated.id ? updated : c; }); });
+    if (semesters.indexOf(sem) === -1) setSemesters(function (p) { return p.concat([sem]); });
+    setEditOpen(false);
+    setEditC(null);
+    showToast("Course updated!", "ok");
+  }
 
   function resolveClash(keepId, dropId) {
     setCourses(function (p) { return p.map(function (c) { return c.id === dropId ? Object.assign({}, c, { active: false }) : c; }); });
@@ -719,6 +738,7 @@ export default function ClassNav() {
                               <span>{c.day} {c.time}</span><span>📍 {c.room}</span><span>⏱ {c.duration}h</span>
                             </div>
                           </div>
+                          <button onClick={function () { openEdit(c); }} style={{ background: "rgba(59,130,246,0.1)", border: "1.5px solid rgba(59,130,246,0.25)", color: "#93c5fd", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", flexShrink: 0 }}>Edit</button>
                           <button onClick={function () { deleteCourse(c.id); }} style={{ background: "rgba(239,68,68,0.1)", border: "1.5px solid rgba(239,68,68,0.25)", color: "#f87171", borderRadius: 8, padding: "6px 14px", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", flexShrink: 0 }}>Remove</button>
                         </div>
                       );
@@ -890,6 +910,69 @@ export default function ClassNav() {
             <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
               <button className="btng" style={{ flex: 1 }} onClick={function () { setAddOpen(false); }}>Cancel</button>
               <button className="btnp" style={{ flex: 2 }} onClick={addCourse} disabled={!newC.name || !newC.room || (newC.semester === "__new__" && !newC._customSem)}>Add Course</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT COURSE */}
+      {editOpen && editC && (
+        <div className="overlay" onClick={closeOnBg(function () { setEditOpen(false); })}>
+          <div className="modal fu" style={{ maxWidth: 480 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
+              <div>
+                <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-.02em" }}>Edit Course</div>
+                <div style={{ fontSize: 12, color: "var(--text3)", marginTop: 3 }}>Update the details for <span style={{ color: "var(--accent)" }}>{editC.name || "this course"}</span></div>
+              </div>
+              <button onClick={function () { setEditOpen(false); }} style={{ background: "var(--bg3)", border: "1px solid var(--border)", color: "var(--text2)", fontSize: 20, cursor: "pointer", lineHeight: 1, padding: "5px 10px", borderRadius: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>x</button>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {[["COURSE NAME", "name", "e.g. Data Structures"], ["CODE", "code", "e.g. CS301"], ["ROOM", "room", "e.g. B-204"], ["INSTRUCTOR", "instructor", "e.g. Dr. Ahmed"]].map(function (t) {
+                return (
+                  <div key={t[1]}>
+                    <label className="lbl">{t[0]}</label>
+                    <input className="inp" placeholder={t[2]} value={editC[t[1]] || ""} onChange={function (e) { var v = e.target.value; setEditC(function (p) { var u = Object.assign({}, p); u[t[1]] = v; return u; }); }} />
+                  </div>
+                );
+              })}
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div><label className="lbl">DAY</label>
+                  <select className="sel" value={editC.day} onChange={function (e) { var v = e.target.value; setEditC(function (p) { return Object.assign({}, p, { day: v }); }); }}>
+                    {DAYS.map(function (d) { return <option key={d}>{d}</option>; })}
+                  </select>
+                </div>
+                <div><label className="lbl">TIME</label>
+                  <select className="sel" value={editC.time} onChange={function (e) { var v = e.target.value; setEditC(function (p) { return Object.assign({}, p, { time: v }); }); }}>
+                    {DEFAULT_SLOTS.map(function (t) { return <option key={t}>{t}</option>; })}
+                  </select>
+                </div>
+                <div><label className="lbl">DURATION (h)</label>
+                  <input
+                    className="inp"
+                    type="number"
+                    min="0.1" max="6" step="0.01"
+                    placeholder="e.g. 1.5"
+                    value={editC.duration}
+                    onChange={function (e) { var v = parseFloat(e.target.value) || 1; setEditC(function (p) { return Object.assign({}, p, { duration: v }); }); }}
+                  />
+                  <div style={{ fontSize: 11, color: "var(--text3)", marginTop: 4 }}>40 min = 0.67 · 1.5h = 1.5 · Lab 2h = 2</div>
+                </div>
+                <div><label className="lbl">SEMESTER</label>
+                  <select className="sel" value={editC.semester} onChange={function (e) { var v = e.target.value; setEditC(function (p) { return Object.assign({}, p, { semester: v }); }); }}>
+                    {semesters.map(function (s) { return <option key={s} value={s}>{s}</option>; })}
+                    <option value="__new__">+ New semester</option>
+                  </select>
+                </div>
+              </div>
+              {editC.semester === "__new__" && (
+                <div><label className="lbl">NEW SEMESTER NAME</label>
+                  <input className="inp" placeholder="e.g. 5th Sem" value={editC._customSem || ""} onChange={function (e) { var v = e.target.value; setEditC(function (p) { return Object.assign({}, p, { _customSem: v }); }); }} />
+                </div>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
+              <button className="btng" style={{ flex: 1 }} onClick={function () { setEditOpen(false); }}>Cancel</button>
+              <button className="btnp" style={{ flex: 2, background: "#3B82F6" }} onClick={saveEdit} disabled={!editC.name || !editC.room || (editC.semester === "__new__" && !editC._customSem)}>Save Changes</button>
             </div>
           </div>
         </div>
